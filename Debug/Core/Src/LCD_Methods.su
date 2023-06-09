@@ -1,0 +1,4 @@
+../Core/Src/LCD_Methods.c:13:6:displayDir	16	static
+../Core/Src/LCD_Methods.c:70:6:displayEmpty	8	static
+../Core/Src/LCD_Methods.c:81:6:displayPass	8	static
+../Core/Src/LCD_Methods.c:92:6:displayFail	8	static

@@ -1,0 +1,5 @@
+../Core/Src/joystick.c:5:5:readJoystick	24	static
+../Core/Src/joystick.c:20:6:startJoystickRead	4	static
+../Core/Src/joystick.c:25:8:checkJoystickComplete	16	static
+../Core/Src/joystick.c:34:6:setupJoystickButton	4	static
+../Core/Src/joystick.c:44:8:detectButtonPress	4	static

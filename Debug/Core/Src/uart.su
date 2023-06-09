@@ -1,0 +1,4 @@
+../Core/Src/uart.c:11:6:UART_init	4	static
+../Core/Src/uart.c:33:6:UART_print	16	static
+../Core/Src/uart.c:41:9:UART_receive	4	static
+../Core/Src/uart.c:47:6:printVal	32	static
