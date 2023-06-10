@@ -50,189 +50,155 @@ static void MX_USART2_UART_Init(void);
 static void MX_SPI1_Init(void);
 static void MX_RNG_Init(void);
 
-// ADC Functions
+// ADC interrupt handler
 void ADC1_2_IRQHandler(void);
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
 
-/* USER CODE END Includes */
 
-/* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN PTD */
-
-/* USER CODE END PTD */
-
-/* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
-/* USER CODE END PD */
-
-/* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN PM */
-
-/* USER CODE END PM */
-
-/* Private variables ---------------------------------------------------------*/
-
-/* USER CODE BEGIN PV */
-
-/* USER CODE END PV */
-
-/* Private function prototypes -----------------------------------------------*/
-
-/* USER CODE BEGIN PFP */
-
-/* USER CODE END PFP */
-
-/* Private user code ---------------------------------------------------------*/
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
-
-/**
- * @brief  The application entry point.
- * @retval int
- */
 
 int main(void) {
-	//initialize random number generator
-//	srand(time(NULL));
 
-	/* Reset of all peripherals, Initializes the Flash interface and the Systick. */
 	HAL_Init();
-	/* Configure the system clock */
 	SystemClock_Config();
-	/* Initialize all configured peripherals */
+
+	//touchscreen initialization
 	MX_GPIO_Init();
 	MX_DMA_Init();
 	MX_USART2_UART_Init();
 	MX_SPI1_Init();
 	MX_RNG_Init();
-	/* USER CODE BEGIN 2 */
 	ILI9341_Init();
-	//ILI9341_setBackLight(1);
+
+	//joystick initialization
 	ADC12_Init();
 	setupJoystickButton();
 
 	//keep track of state in state machine
 	STATE state = IDLE;
 
-	//valid directions to choose from
+	//valid directions for next level
 	DIR options[4] = { UP, DOWN, LEFT, RIGHT };
 
 	//keep track of solutions thus far
 	DIR cache[50];
 
+	//curent level or amount of blue flashes to memorize
 	uint8_t cnt = 0;
 	while (1) {
 
+		//state machine
 		switch (state) {
 
-		//do nothing state, wait for button press
-		case IDLE: {
-			state = GENERATE;
-			displayEmpty();
+			//do nothing state, wait for button press
+			case IDLE: {
+				state = GENERATE;	//next state generate random direction
+				displayEmpty();	//clear screen
 
-			//wait for btn press to move one
-			while (detectButtonPress() == -1)
-				;
-			HAL_Delay(400);
-			break;
-		}
+				//wait for btn press to move one
+				while (detectButtonPress() == -1);
+				HAL_Delay(400);
+				break;
+			}
 
 			//generate next random direction
-		case GENERATE: {
-			cache[cnt] = options[RNG->DR & 0x3];
-			state = DISPLAY;
-			cnt++;
-			break;
-		}
+			case GENERATE: {
+				//get first 2 bits of RNG since only 4 options to choose from direction-wise
+				cache[cnt] = options[RNG->DR & 0x3];
+				state = DISPLAY;	//display pattern so far for user to mimic
+				cnt++;
+				break;
+			}
 
 			//display pattern to mimic
-		case DISPLAY: {
-			for (uint8_t i = 0; i < cnt; i++) {
-				displayDir(cache[i]);
-				HAL_Delay(500);
-				displayEmpty();
-				HAL_Delay(50);
+			case DISPLAY: {
+				//display all paterns up to cnt
+				for (uint8_t i = 0; i < cnt; i++) {
+					displayDir(cache[i]);
+					HAL_Delay(500);
+					displayEmpty();
+					HAL_Delay(50);
+				}
+				//go on to read state to read user input and check againt solution
+				state = READ;
+				break;
 			}
-			state = READ;
-			break;
-		}
 
 			//read user input and compare to solution
-		case READ: {
-			//read user inputs equal to current level
-			displayEmpty();
-			uint8_t i = 0;
-			while (i < cnt) {
+			case READ: {
+				displayEmpty();	//clear LCD
 
-				//read joystick value
-				adc1_value = 1900;
-				adc2_value = 1900;	//reset add values
-				//wait for valid joystick read
-				while (readJoystick(adc1_value, adc2_value) == NONE) {
-					startJoystickRead();
-					while (!checkJoystickComplete(adc1_ready, adc2_ready))
-						;
-				}
-				DIR dir = readJoystick(adc1_value, adc2_value);
+				//read # of user inputs equal to current level
+				uint8_t i = 0;
+				while (i < cnt) {
+					//reset joystick value
+					adc1_value = 1900;
+					adc2_value = 1900;	//reset add values
 
-				displayDir(dir);
-				HAL_Delay(500);
-				displayEmpty();
+					//wait for joystick joystick to be moved by user
+					while (readJoystick(adc1_value, adc2_value) == NONE) {
+						startJoystickRead();		//start adc conversion
+						while (!checkJoystickComplete(adc1_ready, adc2_ready));	//wait for both adc conversoin to be complete
+					}
+					//get joystick directoin if valid direction inputted
+					DIR dir = readJoystick(adc1_value, adc2_value);
 
-				//if input not equal to answer game over
-				if (dir != cache[i]) {
-					state = GAME_OVER;
-					break;
-				}
-				//if correct joystick get next joystick input
-				else {
-					i++;
+					//display input joystick direction
+					displayDir(dir);
+					HAL_Delay(500);
+					displayEmpty();
 
-					//if level finished move on
-					if (i == cnt) {
-						state = PASS;
+					//if input not equal to answer game over
+					if (dir != cache[i]) {
+						state = GAME_OVER;
+						break;
+					}
+					//if correct joystick get next joystick input
+					else {
+						i++;
+
+						//if level finished exit state and get ready for next level
+						if (i == cnt) {
+							state = PASS;
+						}
 					}
 				}
-			}
-			break;
-		} //end case
+				break;
+			} //end case
 
-			//game over screen
-		case GAME_OVER: {
-			displayFail();
-			state = IDLE;
-			cnt = 0;
-
-			//wait for btn press to move one
-			while (detectButtonPress() == -1)
-				;
-			HAL_Delay(200);
-			break;
-		}
-
-			//pass level screeen
-		case PASS: {
-			displayPass();
-			state = GENERATE;
-
-			//reset if max count reached
-			if (cnt == 50) {
+			//game over screen (displays red)
+			case GAME_OVER: {
+				displayFail();
+				state = IDLE;		//go back to starting state
 				cnt = 0;
-				state = IDLE;
-			}
-			HAL_Delay(500);
-			break;
-		}
 
-		default:
-			break;
+				//wait for btn press to move one
+				while (detectButtonPress() == -1)
+					;
+				HAL_Delay(200);
+				break;
+			}
+
+			//pass level screen (displays green)
+			case PASS: {
+				displayPass();
+				state = GENERATE;
+
+				//reset if max count reached
+				if (cnt == 50) {
+					cnt = 0;
+					state = IDLE;
+				}
+				HAL_Delay(500);
+				break;
+			}
+
+			default:
+				break;
 		} //end switch
 	}
 }
 
 void ADC1_2_IRQHandler(void) {
+	//check if ADC1 conversion done
 	if (ADC1->ISR & ADC_ISR_EOC) {
 		// Save the digital conversion to a global variable
 		adc1_value = ADC1->DR;
@@ -242,6 +208,7 @@ void ADC1_2_IRQHandler(void) {
 		ADC1->ISR &= ~(ADC_ISR_EOC);
 	}
 
+	//check if ADC2 conversion done
 	if (ADC2->ISR & ADC_ISR_EOC) {
 		// Save the digital conversion of ADC2 to a global variable
 		adc2_value = ADC2->DR;
@@ -304,14 +271,10 @@ void SystemClock_Config(void) {
  * @retval None
  */
 static void MX_RNG_Init(void) {
+	/*
+	Initialize random number generator generated from IOC
+	*/
 
-	/* USER CODE BEGIN RNG_Init 0 */
-
-	/* USER CODE END RNG_Init 0 */
-
-	/* USER CODE BEGIN RNG_Init 1 */
-
-	/* USER CODE END RNG_Init 1 */
 	hrng.Instance = RNG;
 	if (HAL_RNG_Init(&hrng) != HAL_OK) {
 		Error_Handler();
@@ -470,7 +433,8 @@ static void MX_GPIO_Init(void) {
  * @retval None
  */
 void Error_Handler(void) {
-	/* USER CODE BEGIN Error_Handler_Debug */
+	/* USER CODE BEGIN Error_Handler_
+	Debug */
 	/* User can add his own implementation to report the HAL error return state */
 	__disable_irq();
 	while (1) {

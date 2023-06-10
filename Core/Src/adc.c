@@ -2,6 +2,9 @@
 #include "stm32l4xx_hal.h"
 
 void ADC12_Init(void) {
+	/*
+	Initialized adc1 and adc2
+	*/
 	// Enable GPIOA clock
 	RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;
 
