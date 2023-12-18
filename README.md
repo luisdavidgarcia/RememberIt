@@ -1,29 +1,26 @@
 # RememberIt!-STM32-Game
 
 ## Introduction
-RememberIt is an engaging memory game developed for the Nucleo-L476RG STM32 board, utilizing a joystick for input and an ILI9431 touch LCD screen for display.
+RememberIt is a memory game for the Nucleo-L476RG STM32 board, featuring a joystick and an ILI9431 touch LCD screen.
 
 ## Features
 - Interactive memory challenge.
-- Finite state machine controls game states: IDLE, Generate, Display, Read, Fail, Pass.
+- Uses a finite state machine for game states.
 
 ## Hardware Requirements
-- Nucleo-L476RG STM32 board.
-- Joystick.
-- ILI9431 touch LCD screen.
+- Nucleo-L476RG STM32 board
+- Joystick
+- ILI9431 touch LCD screen
 
-## Software Architecture
-Outlines the game's flow and logic.
+## Cloning and Uploading Instructions
+1. Clone the repository: `git clone [repo URL]`
+2. Open STM32CubeIDE and import the project.
+3. Connect your Nucleo-L476RG board to your computer.
+4. Build and upload the project to the board via STM32CubeIDE.
 
-## Installation and Setup
-Instructions for hardware setup and software installation.
-
-## Usage
-Guidelines on starting the game and gameplay mechanics.
+For more details on software architecture, controls, and more, refer to the included report PDF.
 
 ## Demo Video
-Here's a video demonstration of RememberIt in action:
-
 [![MemoryBoost-STM32-Game Demo](http://img.youtube.com/vi/wnwDgJ2IOxY/0.jpg)](http://www.youtube.com/watch?v=wnwDgJ2IOxY "MemoryBoost-STM32-Game Demo")
 
 ## Contributors
@@ -31,4 +28,4 @@ Here's a video demonstration of RememberIt in action:
 - Aaron Ahmadyar
 
 ## License
-This project is licensed under the Apache License 2.0. For more details, see the [LICENSE](LICENSE) file in this repository or visit [Apache License 2.0](http://www.apache.org/licenses/LICENSE-2.0).
+Licensed under Apache License 2.0. See [LICENSE](LICENSE).
