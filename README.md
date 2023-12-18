@@ -13,7 +13,7 @@ RememberIt is a memory game for the Nucleo-L476RG STM32 board, featuring a joyst
 - ILI9431 touch LCD screen
 
 ## Cloning and Uploading Instructions
-1. Clone the repository: `git clone [repo URL]`
+1. Clone the repository: `git clone https://github.com/luisdavidgarcia/RememberIt.git`
 2. Open STM32CubeIDE and import the project.
 3. Connect your Nucleo-L476RG board to your computer.
 4. Build and upload the project to the board via STM32CubeIDE.
