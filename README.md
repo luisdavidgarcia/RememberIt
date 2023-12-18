@@ -22,7 +22,7 @@ Instructions for hardware setup and software installation.
 Guidelines on starting the game and gameplay mechanics.
 
 ## Demo Video
-Here's a video demonstration of MemoryBoost-STM32-Game in action:
+Here's a video demonstration of RememberIt in action:
 
 [![MemoryBoost-STM32-Game Demo](http://img.youtube.com/vi/wnwDgJ2IOxY/0.jpg)](http://www.youtube.com/watch?v=wnwDgJ2IOxY "MemoryBoost-STM32-Game Demo")
 
